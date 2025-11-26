@@ -7,6 +7,14 @@
  * - Treasury tracking
  */
 
+declare global {
+  interface Window {
+    Pi?: {
+      createPayment: (paymentData: any, callbacks: any) => void
+    }
+  }
+}
+
 type PaymentMetadata = {
   type: "petition" | "civic_share" | "governance"
   userId: string
@@ -25,21 +33,52 @@ type PaymentResult = {
  * Create petition fee payment (5 Pi)
  */
 export async function createPetitionPayment(userId: string): Promise<PaymentResult> {
-  // TODO: Implement actual Pi SDK payment creation
-  // const payment = await pi.createPayment({
-  //   amount: 5,
-  //   memo: "Elmahrosa Civic Petition Fee",
-  //   metadata: { type: "petition", userId, timestamp: new Date().toISOString() }
-  // });
-
-  console.log("[PI PAYMENT] Creating petition payment for user:", userId)
-
-  return {
-    identifier: `petition_${Date.now()}`,
-    amount: 5,
-    memo: "Elmahrosa Civic Petition Fee",
-    status: "pending",
+  if (typeof window === "undefined" || !window.Pi) {
+    console.log("[v0] Pi SDK not available - returning mock payment")
+    return {
+      identifier: `petition_mock_${Date.now()}`,
+      amount: 5,
+      memo: "Elmahrosa Civic Petition Fee",
+      status: "pending",
+    }
   }
+
+  return new Promise((resolve, reject) => {
+    const paymentData = {
+      amount: 5,
+      memo: "Elmahrosa Civic Petition Fee",
+      metadata: {
+        type: "petition",
+        userId,
+        timestamp: new Date().toISOString(),
+      },
+    }
+
+    const callbacks = {
+      onReadyForServerApproval: (paymentId: string) => {
+        console.log("[v0] Payment ready for approval:", paymentId)
+        resolve({
+          identifier: paymentId,
+          amount: 5,
+          memo: "Elmahrosa Civic Petition Fee",
+          status: "pending",
+        })
+      },
+      onReadyForServerCompletion: (paymentId: string, txid: string) => {
+        console.log("[v0] Payment ready for completion:", paymentId, txid)
+      },
+      onCancel: (paymentId: string) => {
+        console.log("[v0] Payment cancelled:", paymentId)
+        reject(new Error("Payment cancelled"))
+      },
+      onError: (error: Error, payment: any) => {
+        console.error("[v0] Payment error:", error)
+        reject(error)
+      },
+    }
+
+    window.Pi!.createPayment(paymentData, callbacks)
+  })
 }
 
 /**
@@ -48,38 +87,56 @@ export async function createPetitionPayment(userId: string): Promise<PaymentResu
 export async function createCivicSharePayment(userId: string, shares: number): Promise<PaymentResult> {
   const amount = shares * 1000
 
-  // TODO: Implement actual Pi SDK payment creation
-  console.log(`[PI PAYMENT] Creating civic share payment: ${shares} shares (${amount} Pi)`)
-
-  return {
-    identifier: `civic_share_${Date.now()}`,
-    amount: amount,
-    memo: `Elmahrosa Civic Shares (${shares} shares)`,
-    status: "pending",
+  if (typeof window === "undefined" || !window.Pi) {
+    console.log("[v0] Pi SDK not available - returning mock payment")
+    return {
+      identifier: `civic_share_mock_${Date.now()}`,
+      amount: amount,
+      memo: `Elmahrosa Civic Shares (${shares} shares)`,
+      status: "pending",
+    }
   }
-}
 
-/**
- * Complete a pending payment
- */
-export async function completePayment(paymentId: string): Promise<boolean> {
-  // TODO: Implement Pi SDK payment completion
-  console.log("[PI PAYMENT] Completing payment:", paymentId)
-  return true
-}
+  return new Promise((resolve, reject) => {
+    const paymentData = {
+      amount: amount,
+      memo: `Elmahrosa Civic Shares (${shares} shares)`,
+      metadata: {
+        type: "civic_share",
+        userId,
+        shares,
+        timestamp: new Date().toISOString(),
+      },
+    }
 
-/**
- * Get payment status
- */
-export async function getPaymentStatus(paymentId: string): Promise<string> {
-  // TODO: Implement Pi SDK payment status check
-  return "completed"
+    const callbacks = {
+      onReadyForServerApproval: (paymentId: string) => {
+        resolve({
+          identifier: paymentId,
+          amount: amount,
+          memo: `Elmahrosa Civic Shares (${shares} shares)`,
+          status: "pending",
+        })
+      },
+      onReadyForServerCompletion: (paymentId: string, txid: string) => {
+        console.log("[v0] Civic share payment completed:", paymentId, txid)
+      },
+      onCancel: (paymentId: string) => {
+        reject(new Error("Payment cancelled"))
+      },
+      onError: (error: Error, payment: any) => {
+        reject(error)
+      },
+    }
+
+    window.Pi!.createPayment(paymentData, callbacks)
+  })
 }
 
 /**
  * Record payment in treasury ledger
  */
 export async function recordInTreasury(payment: PaymentResult, metadata: PaymentMetadata): Promise<void> {
-  // TODO: Record in treasury database
-  console.log("[TREASURY] Recording payment:", { payment, metadata })
+  console.log("[v0] Recording payment in treasury:", { payment, metadata })
+  // TODO: Implement backend API call to record in database
 }
