@@ -1,0 +1,57 @@
+site_name: Teos&Pi Smart City Governance
+site_description: Petition-first governance dashboard for Teos&Pi Smart City Elmahrosa
+site_author: Ayman Seif - Elmahrosa International
+site_url: https://elmahrosa.github.io/Teos-Pi-Smart-City/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: amber
+      accent: deep orange
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.tabs.link
+    - toc.integrate
+
+nav:
+  - Home: index.md
+  - Governance Dashboard: dashboard.md
+  - Documentation:
+      - API: API_DOCUMENTATION.md
+      - NDA Template: NDA_TEMPLATE.md
+      - Contributor Agreement: CONTRIBUTOR_AGREEMENT.md
+      - Civic Share Certificate: CIVIC_SHARE_CERTIFICATE.md
+
+plugins:
+  - search
+  - tags
+
+extra_css:
+  - css/style.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Elmahrosa/Teos-Pi-Smart-City
+  generator: false
+
+copyright: "© 2007-2025 Elmahrosa International. All rights reserved. Owner & Founder: Ayman Seif"

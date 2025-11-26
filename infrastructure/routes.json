@@ -1,0 +1,49 @@
+{
+  "ui": {
+    "citizen": "/app/citizen",
+    "merchant": "/app/merchant",
+    "auditor": "/app/auditor",
+    "founder": "/app/founder"
+  },
+  "core": {
+    "auth": "/core/auth",
+    "treasury": "/core/treasury",
+    "petitions": "/core/petitions",
+    "dashboard": "/core/dashboard"
+  },
+  "api": {
+    "treasury": {
+      "state": "/api/treasury/state",
+      "contribute": "/api/treasury/contribute",
+      "shares": "/api/treasury/shares",
+      "targets": "/api/treasury/targets",
+      "ledger": "/api/treasury/ledger"
+    },
+    "petitions": {
+      "list": "/api/petitions",
+      "create": "/api/petitions/create",
+      "sign": "/api/petitions/[id]/sign",
+      "status": "/api/petitions/[id]/status"
+    },
+    "badges": {
+      "verify": "/api/badges/verify",
+      "assign": "/api/badges/assign",
+      "revoke": "/api/badges/revoke"
+    }
+  },
+  "modules": {
+    "mapOfPi": "/modules/map-of-pi",
+    "wallet": "/modules/wallet",
+    "pump": "/modules/pump",
+    "civicAccounts": "/modules/civic-accounts",
+    "marketEdu": "/modules/market-edu",
+    "schools": "/modules/schools",
+    "sports": "/modules/sports",
+    "healthcare": "/modules/healthcare",
+    "security": "/modules/security",
+    "mobility": "/modules/mobility",
+    "atm": "/modules/atm",
+    "hotel": "/modules/hotel",
+    "mall": "/modules/mall"
+  }
+}

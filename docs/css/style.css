@@ -1,0 +1,87 @@
+/* Teos&Pi Smart City Governance Dashboard Styles */
+/* Owner & Founder: Ayman Seif — Elmahrosa International (Est. 2007) */
+
+/* Outcome badges for petition status */
+.outcome-passed {
+  color: #2ecc71;
+  font-weight: 500;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.outcome-rejected {
+  color: #e74c3c;
+  font-weight: 500;
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.outcome-undecided {
+  color: #f39c12;
+  font-weight: 500;
+  background-color: rgba(243, 156, 18, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.outcome-ready {
+  color: #3498db;
+  font-weight: 500;
+  background-color: rgba(52, 152, 219, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.outcome-inprogress {
+  color: #7f8c8d;
+  font-style: italic;
+  background-color: rgba(127, 140, 141, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(127, 140, 141, 0.3);
+}
+
+.outcome-closed {
+  color: #95a5a6;
+  background-color: rgba(149, 165, 166, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+/* Table styling */
+.md-typeset table:not([class]) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.9em;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: #f8f9fa;
+  padding: 0.75em;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  font-weight: 600;
+}
+
+.md-typeset table:not([class]) td {
+  padding: 0.75em;
+  vertical-align: middle;
+  border: 1px solid #e5e7eb;
+}
+
+.md-typeset table:not([class]) tr:hover {
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+/* Admonition customization */
+.md-typeset .admonition {
+  border-left: 4px solid #ff9800;
+}

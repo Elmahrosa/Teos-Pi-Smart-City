@@ -1,0 +1,51 @@
+{
+  "roles": {
+    "founder": ["repo:admin", "treasury:admin", "governance:admin", "ui:founder", "module:*:admin"],
+    "citizen": [
+      "ui:citizen",
+      "module:map-of-pi:view",
+      "module:wallet:view",
+      "module:schools:view",
+      "module:sports:view",
+      "module:healthcare:view",
+      "petition:sign"
+    ],
+    "merchant": [
+      "ui:merchant",
+      "module:civic-accounts:invoice",
+      "module:wallet:merchant",
+      "module:mall:lease",
+      "module:hotel:manage",
+      "petition:sign"
+    ],
+    "auditor": [
+      "ui:auditor",
+      "core:treasury:read",
+      "core:petitions:read",
+      "governance:incidents:read",
+      "governance:audit:write",
+      "petition:review"
+    ],
+    "officer": [
+      "module:security:write",
+      "module:security:view",
+      "module:mobility:manage",
+      "incident:log",
+      "petition:sign"
+    ],
+    "student": ["module:schools:enroll", "module:schools:view", "module:market-edu:view", "petition:sign"],
+    "contributor": ["repo:read", "repo:write:approved", "module:*:develop", "petition:create"]
+  },
+  "mergePolicy": {
+    "petitionApproved": true,
+    "auditorSignOff": true,
+    "founderSignature": true,
+    "minimumReviewers": 2
+  },
+  "accessRequirements": {
+    "ndaSigned": true,
+    "contributorAgreementSigned": true,
+    "badgeVerified": true,
+    "piAuthCompleted": true
+  }
+}

@@ -1,0 +1,62 @@
+Proprietary Civic License — TEOS Egypt
+Teos&Pi Smart City Elmahrosa
+
+Copyright (c) 2007-2025 Ayman Seif, Elmahrosa International
+All rights reserved.
+
+TERMS AND CONDITIONS
+
+1. OWNERSHIP
+   This software and all associated documentation, code, and materials 
+   (the "Project") are the exclusive property of Ayman Seif and 
+   Elmahrosa International (Est. 2007), collectively referred to as 
+   "TEOS Egypt" or "Owner".
+
+2. RESTRICTIONS
+   - No forks, redistribution, or derivative works are permitted
+   - No commercial use without explicit written consent
+   - No modification or reverse engineering
+   - Access restricted to badge-approved contributors only
+   - All access requires signed NDA and Contributor Agreement
+
+3. PERMITTED USE
+   - View-only access for approved pioneers
+   - Contribution of code under Contributor Agreement terms
+   - Participation in governance through official Pi Network channels
+   - Educational reference with proper attribution
+
+4. PI NETWORK SETTLEMENT
+   - All financial transactions must be conducted in Pi cryptocurrency
+   - External crypto references are educational only
+   - Treasury operations governed by Pi Network protocols
+   - Civic shares are non-transferable outside Pi Network
+
+5. GOVERNANCE
+   - Petition-first governance model required for all updates
+   - Founder authority: Ayman Seif, Elmahrosa International (Est. 2007)
+   - Badge-gated repository access
+   - Dynamic Area Clause applies to all land allocations
+
+6. TERMINATION
+   Access may be revoked immediately upon:
+   - Violation of NDA or Contributor Agreement
+   - Unauthorized redistribution or forking
+   - Misuse of treasury or governance systems
+   - Non-compliance with Egyptian law
+
+7. LIABILITY
+   THE PROJECT IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
+   IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES,
+   OR OTHER LIABILITY ARISING FROM THE USE OF THIS PROJECT.
+
+8. JURISDICTION
+   This license is governed by the laws of the Arab Republic of Egypt.
+   Venue: Alexandria, Egypt.
+
+9. CONTACT
+   For licensing inquiries or permissions:
+   Ayman Seif, Elmahrosa International
+   Alexandria, Egypt
+
+Effective Date: January 1, 2007
+Last Updated: January 2025
