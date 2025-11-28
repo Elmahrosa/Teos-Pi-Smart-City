@@ -1,7 +1,9 @@
 -- schema.sql (UTF-8 safe)
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
@@ -9,7 +11,7 @@ CREATE TABLE users (
 );
 
 -- Telemetry table
-CREATE TABLE telemetry (
+CREATE TABLE IF NOT EXISTS telemetry (
   id SERIAL PRIMARY KEY,
   site VARCHAR(50) NOT NULL,
   sensor VARCHAR(50) NOT NULL,
@@ -18,7 +20,7 @@ CREATE TABLE telemetry (
 );
 
 -- Alerts table
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
   id SERIAL PRIMARY KEY,
   site VARCHAR(50) NOT NULL,
   alert_type VARCHAR(100) NOT NULL,
@@ -27,7 +29,7 @@ CREATE TABLE alerts (
 );
 
 -- Badge definitions table
-CREATE TABLE badge_definitions (
+CREATE TABLE IF NOT EXISTS badge_definitions (
   id SERIAL PRIMARY KEY,
   badge_type VARCHAR(100) UNIQUE NOT NULL,
   sensor VARCHAR(50) NOT NULL,
@@ -46,7 +48,7 @@ VALUES
 ON CONFLICT (badge_type) DO NOTHING;
 
 -- Badges table
-CREATE TABLE badges (
+CREATE TABLE IF NOT EXISTS badges (
   id SERIAL PRIMARY KEY,
   site VARCHAR(50) NOT NULL,
   badge_type VARCHAR(100) NOT NULL,
@@ -54,5 +56,5 @@ CREATE TABLE badges (
 );
 
 -- Unique index on badges (site, badge_type, granted_at)
-CREATE UNIQUE INDEX badges_site_type_date_idx
+CREATE UNIQUE INDEX IF NOT EXISTS badges_site_type_date_idx
 ON badges (site, badge_type, granted_at);
