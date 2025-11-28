@@ -1,44 +1,33 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- schema.sql (UTF-8 safe)
 
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('admin','viewer')),
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
-INSERT INTO users (email, password_hash, role)
-VALUES
-  ('admin@example.com', crypt('admin123', gen_salt('bf')), 'admin'),
-  ('viewer@example.com', crypt('user123', gen_salt('bf')), 'viewer')
-ON CONFLICT (email) DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS telemetry (
-  time TIMESTAMPTZ NOT NULL,
-  device_id TEXT NOT NULL,
-  sensor TEXT NOT NULL,
-  value DOUBLE PRECISION NOT NULL,
-  site TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS badges (
+-- Users table
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  site VARCHAR(50) NOT NULL,
-  badge_type VARCHAR(100) NOT NULL,
-  granted_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(site, badge_type, DATE(granted_at))
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS alerts (
+-- Telemetry table
+CREATE TABLE telemetry (
   id SERIAL PRIMARY KEY,
   site VARCHAR(50) NOT NULL,
   sensor VARCHAR(50) NOT NULL,
-  message TEXT NOT NULL,
-  time TIMESTAMPTZ DEFAULT NOW()
+  value DOUBLE PRECISION NOT NULL,
+  recorded_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS badge_definitions (
+-- Alerts table
+CREATE TABLE alerts (
+  id SERIAL PRIMARY KEY,
+  site VARCHAR(50) NOT NULL,
+  alert_type VARCHAR(100) NOT NULL,
+  triggered_at TIMESTAMPTZ DEFAULT NOW(),
+  details TEXT
+);
+
+-- Badge definitions table
+CREATE TABLE badge_definitions (
   id SERIAL PRIMARY KEY,
   badge_type VARCHAR(100) UNIQUE NOT NULL,
   sensor VARCHAR(50) NOT NULL,
@@ -49,8 +38,21 @@ CREATE TABLE IF NOT EXISTS badge_definitions (
   icon TEXT DEFAULT '🏆'
 );
 
+-- Seed badge definitions
 INSERT INTO badge_definitions (badge_type, sensor, comparator, threshold, duration_sec, description, icon)
 VALUES
-  ('City Health Guardian', 'pm25', 'lt', 35, 21600, 'Awarded when PM2.5 < 35 µg/m³ for 6h', '🌿'),
+  ('City Health Guardian', 'pm25', 'lt', 35, 21600, 'Awarded when PM2.5 < 35 ug/m3 for 6h', '🌿'),
   ('Noise Violation', 'noise', 'gt', 70, 7200, 'Alert when noise > 70 dBA for 2h', '🔊')
 ON CONFLICT (badge_type) DO NOTHING;
+
+-- Badges table
+CREATE TABLE badges (
+  id SERIAL PRIMARY KEY,
+  site VARCHAR(50) NOT NULL,
+  badge_type VARCHAR(100) NOT NULL,
+  granted_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Unique index on badges (site, badge_type, granted_at)
+CREATE UNIQUE INDEX badges_site_type_date_idx
+ON badges (site, badge_type, granted_at);
