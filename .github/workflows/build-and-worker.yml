@@ -1,0 +1,74 @@
+name: Build ZIP + Run IoT Worker
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # manual trigger
+  release:
+    types: [created]
+  schedule:
+    # Run worker every 5 minutes
+    - cron: "*/5 * * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create ZIP scaffold
+        run: |
+          mkdir -p dist
+          zip -r dist/iot-security-scaffold.zip \
+            lib \
+            app/api/auth \
+            app/api/iot \
+            app/components \
+            app/login \
+            app/403 \
+            app/iot-overview \
+            middleware.ts \
+            schema.sql \
+            .env.local.example
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iot-security-scaffold
+          path: dist/iot-security-scaffold.zip
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/iot-security-scaffold.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run IoT worker
+        run: |
+          echo "Starting IoT worker evaluation..."
+          npx tsx lib/iot/worker.ts
