@@ -1,4 +1,4 @@
-name: Build ZIP + Run IoT Worker
+name: Build ZIP + Run IoT Worker + Notify
 
 on:
   push:
@@ -68,7 +68,21 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run IoT worker
+      - name: Run IoT worker and capture logs
         run: |
-          echo "Starting IoT worker evaluation..."
-          npx tsx lib/iot/worker.ts
+          mkdir -p logs
+          npx tsx lib/iot/worker.ts | tee logs/worker-$(date +'%Y%m%d-%H%M%S').log
+
+      - name: Upload worker logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-logs
+          path: logs/
+
+      - name: Send Slack/Discord notification
+        if: always()
+        run: |
+          echo "Posting worker results to Slack/Discord..."
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"IoT Worker run completed at $(date). Logs uploaded as artifact.\"}" \
+            ${{ secrets.WEBHOOK_URL }}
