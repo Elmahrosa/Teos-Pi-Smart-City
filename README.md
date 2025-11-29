@@ -1,26 +1,39 @@
-# Teos Pi Smart City — Pages Router version (ZIP-ready)
+# Teos Pi Smart City — IoT + Pi AI Microservices (Python)
 
-This bundle contains a pages-router (Next.js) compatible scaffold for the Teos Pi Smart City
-security & IoT governance system. Files are corrected for common runtime issues and adapted
-from the app-router draft.
+This sidecar contains Python services for ingestion, AI classification, and badge automation.
 
-## What's included
-- NextAuth configuration (lib/auth.ts) — fixed exports.
-- NextAuth API route: pages/api/auth/[...nextauth].ts
-- IoT governance: lib/iot/{types,governance,rules,worker}.ts with safer SQL usage.
-- API routes under pages/api/iot/...
-- React components moved to `components/`
-- Pages under `pages/` (login, 403, iot-overview)
-- middleware.ts adapted for pages-router token checks
-- package.json and .env.local.example
+## Quick start (local)
+1. Create a Python virtualenv and install packages:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## How to use
-1. Copy these files into your repository root.
-2. Create `.env.local` from `.env.local.example` and fill secrets.
-3. Run DB SQL (see SQL in docs) to create tables.
-4. Install & run:
-   ```bash
-   npm install
-   npm run dev
-   npm run worker
-   ```
+2. Create `.env` file with:
+```
+DATABASE_URL=postgres://teos:password@localhost:5432/teos_iot
+MQTT_BROKER=localhost
+MQTT_PORT=1883
+MQTT_TOPIC=teos/sensors/#
+```
+
+3. Initialize DB:
+```bash
+psql $DATABASE_URL -f schema.sql
+```
+
+4. Run the MQTT listener (or use `sensors.py` to simulate):
+```bash
+python iot/mqtt_listener.py
+```
+
+5. Start badge automation (periodic):
+```bash
+python scripts/earned_badges.py
+```
+
+## Notes
+- The classifier is rule-based by default in `ai/classifier.py`. Replace with ML model as needed.
+- `exporter.py` writes telemetry into Postgres and accepts JSON payloads from MQTT.
+- This scaffold is intentionally dependency-light to help bootstrapping.

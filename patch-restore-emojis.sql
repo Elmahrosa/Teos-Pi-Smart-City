@@ -1,14 +1,7 @@
--- Patch to restore UTF-8 emoji icons in badge_definitions
--- Run this after schema.sql to ensure proper emoji rendering
--- Founder: Ayman Seif | TEOS Egypt
+-- Re-encode/rescue emoji fields in badge_definitions if needed.
+-- Run this if emoji characters appear garbled after a migration.
 
--- Update badge icons with UTF-8 emojis
-UPDATE badge_definitions SET icon = '🌿' WHERE name = 'Eco Guardian';
-UPDATE badge_definitions SET icon = '🔊' WHERE name = 'Quiet Keeper';
-UPDATE badge_definitions SET icon = '🚗' WHERE name = 'Traffic Monitor';
-UPDATE badge_definitions SET icon = '🏛️' WHERE name = 'Civic Pioneer';
-UPDATE badge_definitions SET icon = '⚡' WHERE name = 'Energy Saver';
-UPDATE badge_definitions SET icon = '💧' WHERE name = 'Water Guardian';
-
--- Verify emoji restoration
-SELECT name, icon, description FROM badge_definitions ORDER BY name;
+ALTER TABLE badge_definitions ALTER COLUMN icon TYPE TEXT COLLATE "C";
+-- If you need to reseed icons, example:
+UPDATE badge_definitions SET icon = '🌿' WHERE name ILIKE '%green%';
+UPDATE badge_definitions SET icon = '🔊' WHERE name ILIKE '%noise%';
