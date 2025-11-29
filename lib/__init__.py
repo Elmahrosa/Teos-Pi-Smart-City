@@ -1,1 +1,1 @@
-# helper package for scripts (placeholder)
+# shared library placeholder

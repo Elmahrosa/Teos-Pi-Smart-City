@@ -1,46 +1,98 @@
-version: '3.8'
+version: "3.9"
+
 services:
-  postgres:
+  db:
     image: postgres:15
+    container_name: teos_pi_db
     environment:
-      POSTGRES_DB: teosdb
       POSTGRES_USER: teos
-      POSTGRES_PASSWORD: teos
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      POSTGRES_PASSWORD: teos_password
+      POSTGRES_DB: teos_iot
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./patch-restore-emojis.sql:/docker-entrypoint-initdb.d/02_patch_emojis.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teos -d teos_iot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  mosquitto:
-    image: eclipse-mosquitto:2.0
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: teos_mqtt
     ports:
       - "1883:1883"
+      - "9001:9001"
     volumes:
-      - mosq_conf:/mosquitto/config
+      - mqtt_data:/mosquitto/data
+      - mqtt_log:/mosquitto/log
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "$$SYS/broker/version", "-C", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  iot:
+  mqtt_listener:
     build:
       context: .
-      dockerfile: Dockerfile.iot
+      dockerfile: iot/Dockerfile
+    container_name: teos_mqtt_listener
     environment:
-      MQTT_BROKER: mosquitto
+      DATABASE_URL: postgres://teos:teos_password@db:5432/teos_iot
+      MQTT_HOST: mqtt
       MQTT_PORT: 1883
+      MQTT_TOPIC: sensors/#
     depends_on:
-      - mosquitto
+      db:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    restart: unless-stopped
 
-  ai:
+  exporter:
     build:
       context: .
-      dockerfile: Dockerfile.ai
+      dockerfile: iot/Dockerfile
+    container_name: teos_exporter
+    command: ["python", "iot/exporter.py"]
     environment:
-      PGHOST: postgres
-      PGPORT: 5432
-      PGDATABASE: teosdb
-      PGUSER: teos
-      PGPASSWORD: teos
+      DATABASE_URL: postgres://teos:teos_password@db:5432/teos_iot
     depends_on:
-      - postgres
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  classifier:
+    build:
+      context: .
+      dockerfile: ai/Dockerfile
+    container_name: teos_classifier
+    environment:
+      DATABASE_URL: postgres://teos:teos_password@db:5432/teos_iot
+      THRESHOLDS_PATH: ai/thresholds.json
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  earned_badges:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile
+    container_name: teos_earned_badges
+    command: ["python", "scripts/earned_badges.py", "--interval", "300"]
+    environment:
+      DATABASE_URL: postgres://teos:teos_password@db:5432/teos_iot
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  pgdata:
-  mosq_conf:
+  db_data:
+  mqtt_data:
+  mqtt_log:
