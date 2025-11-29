@@ -1,236 +1,26 @@
-<div align="center">
+# Teos Pi Smart City — Pages Router version (ZIP-ready)
 
-<img src="public/banner-teos-pi-smart-city.jpg" alt="Teos & Pi Smart City Elmahrosa Banner" width="100%"/>
+This bundle contains a pages-router (Next.js) compatible scaffold for the Teos Pi Smart City
+security & IoT governance system. Files are corrected for common runtime issues and adapted
+from the app-router draft.
 
-# TEOS&PI Smart City Elmahrosa
-### Egypt's First Pi-Powered Civic Smart City — Built 100% Using the Pi SDK
+## What's included
+- NextAuth configuration (lib/auth.ts) — fixed exports.
+- NextAuth API route: pages/api/auth/[...nextauth].ts
+- IoT governance: lib/iot/{types,governance,rules,worker}.ts with safer SQL usage.
+- API routes under pages/api/iot/...
+- React components moved to `components/`
+- Pages under `pages/` (login, 403, iot-overview)
+- middleware.ts adapted for pages-router token checks
+- package.json and .env.local.example
 
-<!-- Shields -->
-<img src="https://img.shields.io/badge/Built%20with-Pi%20SDK-gold" />
-<img src="https://img.shields.io/badge/Civic%20Share-1000%20Pi-blue" />
-<img src="https://img.shields.io/badge/Petition-5%20Pi-red" />
-<img src="https://img.shields.io/badge/Made%20in-Egypt-black" />
-<img src="https://img.shields.io/badge/Official%20X-@King__Teos-1DA1F2?logo=twitter&style=flat" />
-
-</div>
-
----
-
-# 📌 Overview
-
-**Teos&Pi Smart City Elmahrosa** is the first civic community of its kind, integrating:
-
-- Schools  
-- Hospitals  
-- Sports facilities  
-- Housing  
-- Banking & finance  
-- Hotels  
-- Malls  
-- Public administration  
-
-—all governed through a **100% Pi-only model** using the **official Pi SDK**.
-
-Every pioneer joins through:
-
-- **5 Pi petition fee** → civic registration  
-- **1,000 Pi** → **1 civic share**, with the option to acquire more  
-
-This creates a transparent, community-owned civic economy built entirely inside the Pi ecosystem.
-
-Elmahrosa is the **first prototype city**, designed to expand across **Egypt** and globally.
-
----
-
-# 🏛 Governance Flow Diagram
-
-\`\`\`
-      ┌───────────────────────┐
-      │   Petition (5 Pi)     │
-      └──────────┬────────────┘
-                 ↓
-    ┌──────────────────────────────┐
-    │ Civic Share (1000 Pi each)   │
-    └──────────┬───────────────────┘
-               ↓
- ┌────────────────────────────────────┐
- │     Pi Treasury (Full Transparency)│
- └──────────┬─────────────────────────┘
-            ↓
- ┌────────────────────────────────────┐
- │ Governance Actions                 │
- │ - Voting                           │
- │ - Budgets                          │
- │ - City Approvals                   │
- └──────────┬─────────────────────────┘
-            ↓
- ┌────────────────────────────────────┐
- │ Public Dashboards & Metrics        │
- └────────────────────────────────────┘
-\`\`\`
-
----
-
-# 🚀 Key Features
-
-### 🌐 100% Pi-Native Governance  
-All logic, contributions, and civic actions run through the **Pi SDK**.
-
-### 📊 Real-Time Civic Dashboards  
-Transparent reporting for:  
-- Treasury  
-- Petition count  
-- Civic shares  
-- City KPIs  
-- Spending & proposals  
-
-### 🏗 Modular Smart City System  
-Includes:  
-- Pi Constitution  
-- Pi Hospital System  
-- Bank of Pi  
-- Map of Pi  
-- FPBE Engine  
-- TEOS Wallet  
-- Elmahrosa Digital Gate  
-
-### 🛡 Trust & Compliance Layer  
-- Anti-corruption design  
-- Public auditing  
-- Open reporting  
-- Verified identity rules  
-
-### 🤖 Pi AI IoT Integration  
-The smart city infrastructure includes **5,000+ LoRaWAN gateways** with AI-powered sensor classification:
-
-- **PM2.5 Air Quality** - Egyptian Environmental Affairs Agency (EEAA) standards
-- **Noise Monitoring** - Egyptian Law 4/1994 Article 47 compliance
-- **Traffic Flow Analysis** - Alexandria Traffic Authority integration
-
-Citizens earn badges automatically through Pi AI evaluation:
-
-- 🌿 **Eco Guardian** - Maintain clean air for 30 days
-- 🔊 **Quiet Keeper** - Keep noise low for 7 days
-- 🚗 **Traffic Monitor** - Report 100 traffic readings
-
-Pi AI Architecture:
-
-\`\`\`
-Sensor → LoRaWAN → Pi AI Classifier → Badge Evaluation → Civic Dashboard
-\`\`\`
-
-See `STRUCTURE.md` for full Pi AI integration details and contributor guide.
-
----
-
-# 📁 Repository Structure
-
-\`\`\`
-/app                     → Next.js dashboard (Pi SDK integrated)
-/components              → UI components
-/hooks                   → Client logic
-/lib                     → Pi SDK logic + civic helpers
-/public                  → Logos, banners
-/scripts                 → Automation & data reports
-/docs                    → MkDocs civic docs
-.github/workflows        → CI/CD + nightly updates
-README.md
-TERMS.md
-SECURITY.md
-LICENSE
-\`\`\`
-
----
-
-# ⚙️ Installation & Development
-
-### Clone the repository
-\`\`\`bash
-git clone https://github.com/Elmahrosa/Teos-Pi-Smart-City.git
-cd Teos-Pi-Smart-City
-\`\`\`
-
-### Frontend setup
-\`\`\`bash
-cd app
-npm install
-npm run dev
-\`\`\`
-
-### Automation scripts
-\`\`\`bash
-cd scripts
-pip install -r requirements.txt
-python generate_dashboard.py
-\`\`\`
-
-### Environment
-Create `.env` from `/docs/env.example`.
-
----
-
-# ☁️ Deployment (Vercel)
-
-Optimized for:
-- Next.js (frontend)
-- MkDocs (documentation)
-- Pi SDK integration
-- Nightly GitHub Actions auto-deploy
-
-`vercel.json` available on request.
-
----
-
-# 🌍 Connected Civic Projects
-
-| Project | Description |
-|---------|-------------|
-| **TEOS Wallet** | Pi civic wallet (Pi SDK) |
-| **Constitution Project** | Governance & law framework |
-| **Map of Pi** | Cities + populations |
-| **Hospital Pi Module** | Pi-powered medical system |
-| **Bank of Pi** | Economic + treasury engine |
-| **FPBE Model** | Pi financial backbone |
-| **Elmahrosa Digital Gate** | Smart city access portal |
-
----
-
-# 🧭 Roadmap
-
-### **Phase 1 — Foundation**
-- Petition + civic shares
-- Pi treasury
-- Transparency model
-
-### **Phase 2 — Expansion**
-- Schools, hospitals, finance
-- Automated city governance
-
-### **Phase 3 — Replication**
-- Other Egyptian cities
-- Global Pi smart city network
-
----
-
-# 🤝 Contributing
-
-We welcome contributions.
-Please read `CONTRIBUTING.md`.
-
----
-
-# 📩 Contact
-
-- Telegram: **@ElmahrosaPi**
-- X (Twitter): **@King_Teos**
-- LinkedIn: **Ayman Seif**
-- Website: **[https://teosegypt.com](https://teosegypt.com)**
-- GitHub: **Elmahrosa**
-
----
-
-<div align="center">
-
-### **From Egypt to the World — Building the First Pi-Powered Nation.**
-
-</div>
+## How to use
+1. Copy these files into your repository root.
+2. Create `.env.local` from `.env.local.example` and fill secrets.
+3. Run DB SQL (see SQL in docs) to create tables.
+4. Install & run:
+   ```bash
+   npm install
+   npm run dev
+   npm run worker
+   ```

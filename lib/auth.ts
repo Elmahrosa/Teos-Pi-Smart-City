@@ -1,25 +1,56 @@
-// Mock authentication - In production, integrate with Pi Network SDK
-import type { Pioneer, BadgeType } from "./types"
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { Pool } from "pg";
 
-const MOCK_PIONEER: Pioneer = {
-  id: "pioneer-001",
-  username: "Ayman Seif",
-  piId: "pi-founder-001",
-  badges: ["founder"],
-  joinedAt: new Date("2007-01-01"),
-  signedGovernance: true,
-  signingFeePaid: true,
-}
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-export async function getCurrentPioneer(): Promise<Pioneer | null> {
-  // In production: integrate with Pi Network authentication
-  return MOCK_PIONEER
-}
+export const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
 
-export function hasBadge(pioneer: Pioneer | null, badge: BadgeType): boolean {
-  return pioneer?.badges.includes(badge) ?? false
-}
+        const { rows } = await pool.query(
+          `SELECT id, email, role, password_hash FROM users
+           WHERE email = $1 LIMIT 1`,
+          [credentials.email]
+        );
 
-export function hasAnyBadge(pioneer: Pioneer | null, badges: BadgeType[]): boolean {
-  return badges.some((badge) => hasBadge(pioneer, badge))
-}
+        if (!rows || rows.length === 0) return null;
+        const user = rows[0];
+
+        // verify password using pgcrypt on the DB side
+        const { rows: passCheck } = await pool.query(
+          `SELECT (password_hash = crypt($1, password_hash)) AS ok FROM users WHERE id = $2`,
+          [credentials.password, user.id]
+        );
+        if (!passCheck[0] || !passCheck[0].ok) return null;
+
+        return { id: user.id, email: user.email, role: user.role };
+      }
+    })
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.role = user.role;
+      return token;
+    },
+    async session({ session, token }) {
+      if (session?.user) session.user.role = token.role;
+      return session;
+    }
+  },
+  pages: {
+    signIn: "/login",
+    signOut: "/login"
+  },
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET
+};
+
+export default authOptions;
