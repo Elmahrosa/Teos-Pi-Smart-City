@@ -1,43 +1,47 @@
-"""Simple rule-based classifier with pluggable ML hook.
+"""Lightweight classifier that reads recent telemetry and decides badge candidates."""
+import os, time, json
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
-Functions:
-- classify(payload) -> { alerts: [...], scores: {...} }
+DB_PARAMS = dict(
+    host=os.environ.get('PGHOST','postgres'),
+    port=int(os.environ.get('PGPORT',5432)),
+    dbname=os.environ.get('PGDATABASE','teosdb'),
+    user=os.environ.get('PGUSER','teos'),
+    password=os.environ.get('PGPASSWORD','teos'),
+)
 
-Replace or extend with a trained model (scikit-learn, tensorflow, etc.)
-"""
-import json
-import os
-from typing import Dict
-THRESHOLDS_PATH = os.path.join(os.path.dirname(__file__), 'thresholds.json')
+def fetch_recent(limit=100):
+    conn = psycopg2.connect(**DB_PARAMS)
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("""SELECT device_id, metric, value, ts FROM telemetry ORDER BY ts DESC LIMIT %s""", (limit,))
+        rows = cur.fetchall()
+    conn.close()
+    return rows
 
-def load_thresholds():
-    try:
-        with open(THRESHOLDS_PATH, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {
-            'pm25': { 'critical': 150, 'warning': 75 },
-            'noise_db': { 'critical': 95, 'warning': 75 }
-        }
-
-TH = load_thresholds()
-
-def classify(payload: Dict):
-    metrics = payload.get('metrics', {})
-    alerts = []
+def classify(rows):
+    # Simple rule-based classification using thresholds.json
+    with open('thresholds.json') as f:
+        thresholds = json.load(f)
     scores = {}
-    for m, v in metrics.items():
-        th = TH.get(m)
-        if not th:
+    for r in rows:
+        metric = r['metric']
+        val = r['value']
+        device = r['device_id']
+        thr = thresholds.get(metric)
+        if thr is None:
             continue
-        if v >= th.get('critical', 1e9):
-            alerts.append({'metric': m, 'level': 'critical', 'value': v})
-        elif v >= th.get('warning', 1e9):
-            alerts.append({'metric': m, 'level': 'warning', 'value': v})
-        scores[m] = v
-    return {'alerts': alerts, 'scores': scores}
+        # lower is better for pm2_5 and noise_db
+        if metric in ('pm2_5','noise_db'):
+            if val <= thr.get('good', float('inf')):
+                scores.setdefault(device, 0)
+                scores[device] += 1
+        else:
+            # default behavior
+            pass
+    return scores
 
-# Example usage:
 if __name__ == '__main__':
-    sample = {'metrics': {'pm25': 180, 'noise_db': 60}}
-    print(classify(sample))
+    rows = fetch_recent(200)
+    print('rows', len(rows))
+    print('classification scores', classify(rows))

@@ -1,64 +1,47 @@
--- Schema for Teos Pi Smart City (IoT + Badge Automation)
--- Ensure the database encoding is UTF8 to support emoji badges.
+-- UTF-8 safe schema for badges and telemetry
+-- Ensure your database uses UTF8 encoding:
+-- createdb -E UTF8 teosdb
 
--- Enable extensions
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- Users (simple)
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('admin','viewer')) DEFAULT 'viewer',
-  created_at TIMESTAMPTZ DEFAULT now()
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL
 );
 
--- Telemetry (time-series)
+CREATE TABLE IF NOT EXISTS devices (
+    id SERIAL PRIMARY KEY,
+    device_id TEXT UNIQUE NOT NULL,
+    owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS telemetry (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ts TIMESTAMPTZ NOT NULL DEFAULT now(),
-  device_id TEXT NOT NULL,
-  metric TEXT NOT NULL,
-  value DOUBLE PRECISION,
-  location JSONB,
-  raw JSONB
-);
-SELECT create_hypertable('telemetry', 'ts', if_not_exists => true);
-
--- Alerts
-CREATE TABLE IF NOT EXISTS alerts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  device_id TEXT NOT NULL,
-  metric TEXT NOT NULL,
-  severity TEXT NOT NULL,
-  message TEXT NOT NULL,
-  acknowledged BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT now()
+    id BIGSERIAL PRIMARY KEY,
+    device_id TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
+    ts TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Badge definitions (emoji-safe text)
-CREATE TABLE IF NOT EXISTS badge_definitions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  icon TEXT NOT NULL, -- emoji or small string
-  rule JSONB NOT NULL, -- {metric, operator, threshold, duration_minutes}
-  enabled BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ
+CREATE TABLE IF NOT EXISTS badges (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    emoji TEXT -- store emoji as unicode (UTF-8)
 );
 
--- Earned badges
 CREATE TABLE IF NOT EXISTS earned_badges (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  badge_id UUID REFERENCES badge_definitions(id) ON DELETE CASCADE,
-  device_id TEXT,
-  earned_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(user_id, badge_id)
+    id BIGSERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    badge_id INTEGER REFERENCES badges(id) ON DELETE CASCADE,
+    awarded_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    metadata JSONB
 );
 
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS telemetry_device_idx ON telemetry(device_id);
-CREATE INDEX IF NOT EXISTS telemetry_metric_idx ON telemetry(metric);
-CREATE INDEX IF NOT EXISTS alerts_device_idx ON alerts(device_id);
+-- Seed a few emoji badges (UTF-8 safe)
+INSERT INTO badges (code, name, description, emoji) VALUES
+('green-thumb','Green Thumb','Sustained low emissions / green actions','🌿')
+ON CONFLICT (code) DO UPDATE SET name=EXCLUDED.name;
+
+INSERT INTO badges (code, name, description, emoji) VALUES
+('noise-watcher','Noise Watcher','Reported/mitigated high noise events','🔊')
+ON CONFLICT (code) DO UPDATE SET name=EXCLUDED.name;

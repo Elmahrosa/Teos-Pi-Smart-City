@@ -1,33 +1,38 @@
-"""Simple sensor simulator — publishes random telemetry to MQTT for testing."""
-import time, json, random, os
+"""Simple device simulator that publishes sample telemetry to an MQTT broker."""
+import time
+import json
+import random
+import os
 import paho.mqtt.client as mqtt
 
-BROKER = os.environ.get('MQTT_BROKER', 'localhost')
-PORT = int(os.environ.get('MQTT_PORT', 1883))
-TOPIC = os.environ.get('MQTT_TOPIC', 'teos/sensors/')
+MQTT_BROKER = os.environ.get('MQTT_BROKER', 'mosquitto')
+MQTT_PORT = int(os.environ.get('MQTT_PORT', 1883))
+TOPIC = os.environ.get('MQTT_TOPIC', 'teos/sensors')
 
-client = mqtt.Client()
-
-def publish_simulated(device_id):
-    payload = {
-        'device_id': device_id,
-        'ts': time.time(),
-        'metrics': {
-            'pm25': round(random.uniform(5, 200), 2),
-            'noise_db': round(random.uniform(30, 110), 1),
-            'traffic_index': round(random.uniform(0, 1), 3)
+def make_message(device_id):
+    return {
+        "device_id": device_id,
+        "metrics": {
+            "pm2_5": round(random.uniform(5, 150), 2),
+            "noise_db": round(random.uniform(30, 100), 1),
+            "temp_c": round(random.uniform(10, 40), 1)
         },
-        'location': {'lat': 30.0444, 'lng': 31.2357}
+        "ts": time.time()
     }
-    client.publish(f"{TOPIC}{device_id}", json.dumps(payload))
 
-if __name__ == '__main__':
-    client.connect(BROKER, PORT, 60)
-    client.loop_start()
+def run(publish_interval=2):
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER, MQTT_PORT)
+    device_ids = [f"dev-{i:03d}" for i in range(1,6)]
     try:
         while True:
-            publish_simulated('device-001')
-            time.sleep(2)
+            dev = random.choice(device_ids)
+            msg = make_message(dev)
+            client.publish(TOPIC, json.dumps(msg))
+            print('published', msg)
+            time.sleep(publish_interval)
     except KeyboardInterrupt:
-        client.loop_stop()
         client.disconnect()
+
+if __name__ == '__main__':
+    run()

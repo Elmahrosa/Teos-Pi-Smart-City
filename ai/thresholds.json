@@ -1,14 +1,14 @@
 {
-  "pm25": {
-    "warning": 75,
-    "critical": 150
+  "pm2_5": {
+    "good": 35.0,
+    "warn": 75.0
   },
   "noise_db": {
-    "warning": 75,
-    "critical": 95
+    "good": 55.0,
+    "warn": 85.0
   },
-  "traffic_index": {
-    "warning": 0.6,
-    "critical": 0.85
+  "temp_c": {
+    "good": 30.0,
+    "warn": 38.0
   }
 }

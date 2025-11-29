@@ -1,96 +1,51 @@
-"""Periodic script to evaluate badge definitions and award badges.
-
-Simple algorithm:
-- Load enabled badge_definitions
-- For each badge, find devices/users that match rule within duration
-- Insert into earned_badges for the owning user (placeholder: first admin)
-
-This script is intentionally simple; adapt `get_device_owner` to your devices table.
-"""
+"""Periodic badge evaluator: maps device -> owner and awards badges based on classifier scores."""
 import os, json
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from lib import time as _time
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if not DATABASE_URL:
-    raise RuntimeError('DATABASE_URL must be set')
+DB_PARAMS = dict(
+    host=os.environ.get('PGHOST','postgres'),
+    port=int(os.environ.get('PGPORT',5432)),
+    dbname=os.environ.get('PGDATABASE','teosdb'),
+    user=os.environ.get('PGUSER','teos'),
+    password=os.environ.get('PGPASSWORD','teos'),
+)
 
-def get_conn():
-    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-
-def get_badges(conn):
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM badge_definitions WHERE enabled = true")
-    return cur.fetchall()
-
-def get_active_devices(conn, minutes=60):
-    cur = conn.cursor()
-    cur.execute("SELECT DISTINCT device_id FROM telemetry WHERE ts > NOW() - INTERVAL %s", (f'{minutes} minutes',))
-    return [r['device_id'] for r in cur.fetchall()]
-
-def evaluate_rule(conn, device_id, rule):
-    # rule is JSON: {metric, operator, threshold, duration_minutes}
-    metric = rule.get('metric')
-    operator = rule.get('operator', '>')
-    threshold = rule.get('threshold')
-    duration = rule.get('duration_minutes', 60)
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT value FROM telemetry WHERE device_id=%s AND metric=%s AND ts > NOW() - INTERVAL %s",
-        (device_id, metric, f"{duration} minutes")
-    )
-    rows = cur.fetchall()
-    if not rows:
-        return False
-    for r in rows:
-        val = r['value']
-        if operator == '>' and val > threshold:
-            return True
-        if operator == '>=' and val >= threshold:
-            return True
-        if operator == '<' and val < threshold:
-            return True
-        if operator == '<=' and val <= threshold:
-            return True
-        if operator == '==' and val == threshold:
-            return True
-        if operator == '!=' and val != threshold:
-            return True
-    return False
-
-def get_device_owner(conn, device_id):
-    # TODO: implement device registry mapping device -> user
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM users WHERE role='admin' LIMIT 1")
+def get_device_owner(device_id, cur):
+    cur.execute('SELECT owner_id FROM devices WHERE device_id=%s', (device_id,))
     r = cur.fetchone()
-    return r['id'] if r else None
+    return r['owner_id'] if r else None
 
-def grant_badge(conn, user_id, badge_id, device_id):
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO earned_badges (user_id, badge_id, device_id) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING",
-            (user_id, badge_id, device_id)
-        )
-        conn.commit()
-        print('Granted badge', badge_id, 'to', user_id)
-    except Exception as e:
-        print('Failed to grant badge', e)
-        conn.rollback()
+def award_badge(user_id, badge_code, cur):
+    cur.execute('SELECT id FROM badges WHERE code=%s', (badge_code,))
+    b = cur.fetchone()
+    if not b:
+        return
+    badge_id = b['id']
+    cur.execute('SELECT 1 FROM earned_badges WHERE user_id=%s AND badge_id=%s', (user_id, badge_id))
+    if cur.fetchone():
+        return
+    cur.execute('INSERT INTO earned_badges (user_id, badge_id, metadata) VALUES (%s,%s,%s)', (user_id, badge_id, json.dumps({})))
+    print('awarded', badge_code, 'to', user_id)
 
-def main():
-    conn = get_conn()
-    badges = get_badges(conn)
-    devices = get_active_devices(conn, minutes=60)
-    for b in badges:
-        rule = b['rule'] if isinstance(b['rule'], dict) else json.loads(b['rule'])
-        for d in devices:
-            if evaluate_rule(conn, d, rule):
-                user_id = get_device_owner(conn, d)
-                if user_id:
-                    grant_badge(conn, user_id, b['id'], d)
+def run():
+    conn = psycopg2.connect(**DB_PARAMS)
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        # simple heuristic: devices with >=3 'good' readings in classifier
+        cur.execute("""SELECT device_id, count(*) as cnt
+                      FROM telemetry
+                      WHERE metric IN ('pm2_5','noise_db')
+                      GROUP BY device_id
+                      HAVING avg(value) < 50 -- placeholder rule
+                   """)
+        rows = cur.fetchall()
+        for r in rows:
+            device = r['device_id']
+            owner = get_device_owner(device, cur)
+            if owner:
+                award_badge(owner, 'green-thumb', cur)
+    conn.commit()
     conn.close()
 
 if __name__ == '__main__':
-    main()
+    run()

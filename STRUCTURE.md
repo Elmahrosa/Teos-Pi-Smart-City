@@ -1,33 +1,25 @@
-# Repository Structure — IoT + Pi AI Microservices (Python sidecar)
+# Repository Structure (Teos-Pi-Smart-City)
 
-This folder contains standalone Python services designed to run alongside the Next.js app.
-They handle real-world device ingestion, basic Pi-AI classification, and badge automation.
+This file explains the layout added to integrate IoT ingestion, Pi AI microservices, badge automation, and UTF-8-safe schema patches.
 
-Top-level:
-- schema.sql — SQL schema to create the required tables
-- patch-restore-emojis.sql — helpers to fix emoji encoding if necessary
-- README.md — quick start
-- STRUCTURE.md — this file
+Top-level additions:
+- /iot - Python sidecar services that simulate and ingest sensor telemetry.
+- /ai  - Lightweight microservices for classification, thresholds and alerts.
+- /scripts - Automation scripts (badge evaluation, maintenance tasks).
+- docker-compose.yml - reproducible local stack (Postgres + Mosquitto + services).
+- Dockerfile.* - container images for iot and ai services.
+- schema.sql and patch-restore-emojis.sql - UTF-8 safe schema and reseed script for emoji badges.
 
-Directories:
-- iot/
-  - sensors.py         # Lightweight sensor simulator (for local testing)
-  - mqtt_listener.py   # MQTT consumer (paho-mqtt) to ingest device messages
-  - exporter.py        # Writes received telemetry into Postgres
-- ai/
-  - classifier.py      # Rule-based + pluggable classifier for telemetry (placeholder for models)
-  - thresholds.json    # Thresholds and badge rule examples
-  - alerts.py          # Predictive alert logic (uses classifier)
-- scripts/
-  - earned_badges.py   # Periodic runner that evaluates badge rules and inserts earned_badges
-  - migrate.sh         # Applies schema.sql to a database
+Quick start (local):
+1. Install Docker & docker-compose.
+2. From repo root: docker-compose up --build
+3. Services:
+   - MQTT broker: mosquitto:1883
+   - Postgres: postgres:5432 (user: teos / password: teos)
+   - iot service: publishes/subscribes to /teos/sensors
+   - ai service: polls DB or subscribes to MQTT for classification
+   - scripts/earned_badges.py: can be run manually or as a cron job
 
-Run patterns:
-- Run mqtt_listener.py as a long-running service (systemd / docker-compose)
-- exporter.py is used by mqtt_listener (imported)
-- classifier.py and alerts.py can be imported by exporter or run as a task
-- earned_badges.py can be invoked by cron or a scheduler every minute
-
-Security:
-- Use environment variables for DB credentials (see README.md)
-- Services communicate only with DB and optionally a message queue (MQTT)
+Notes:
+- All SQL files are UTF-8 encoded. Use psql client with UTF-8 locale.
+- These are scaffold files with safe defaults — adapt thresholds, DB connection strings, and secrets for production.

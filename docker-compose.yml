@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: teosdb
+      POSTGRES_USER: teos
+      POSTGRES_PASSWORD: teos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosq_conf:/mosquitto/config
+
+  iot:
+    build:
+      context: .
+      dockerfile: Dockerfile.iot
+    environment:
+      MQTT_BROKER: mosquitto
+      MQTT_PORT: 1883
+    depends_on:
+      - mosquitto
+
+  ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: teosdb
+      PGUSER: teos
+      PGPASSWORD: teos
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
+  mosq_conf:
