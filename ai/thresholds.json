@@ -1,0 +1,50 @@
+{
+  "pm25": {
+    "unit": "μg/m³",
+    "excellent": 12,
+    "good": 35,
+    "moderate": 55,
+    "poor": 150,
+    "hazardous": 250,
+    "source": "Egyptian Environmental Affairs Agency (EEAA)"
+  },
+  "noise": {
+    "unit": "dB",
+    "quiet": 50,
+    "acceptable": 65,
+    "elevated": 75,
+    "excessive": 85,
+    "source": "Egyptian Law 4/1994 Article 47"
+  },
+  "traffic": {
+    "unit": "vehicles/hour",
+    "light": 100,
+    "moderate": 300,
+    "heavy": 600,
+    "congested": 1000,
+    "source": "Alexandria Traffic Authority"
+  },
+  "badges": {
+    "eco_guardian": {
+      "name": "Eco Guardian",
+      "icon": "🌿",
+      "threshold_type": "duration",
+      "threshold_value": 720,
+      "description": "Maintain PM2.5 < 35 μg/m³ for 30 days (720 hours)"
+    },
+    "quiet_keeper": {
+      "name": "Quiet Keeper",
+      "icon": "🔊",
+      "threshold_type": "duration",
+      "threshold_value": 168,
+      "description": "Keep noise < 65 dB for 7 days (168 hours)"
+    },
+    "traffic_monitor": {
+      "name": "Traffic Monitor",
+      "icon": "🚗",
+      "threshold_type": "count",
+      "threshold_value": 100,
+      "description": "Report 100 traffic readings"
+    }
+  }
+}
