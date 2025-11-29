@@ -100,6 +100,27 @@ Includes:
 - Open reporting  
 - Verified identity rules  
 
+### 🤖 Pi AI IoT Integration  
+The smart city infrastructure includes **5,000+ LoRaWAN gateways** with AI-powered sensor classification:
+
+- **PM2.5 Air Quality** - Egyptian Environmental Affairs Agency (EEAA) standards
+- **Noise Monitoring** - Egyptian Law 4/1994 Article 47 compliance
+- **Traffic Flow Analysis** - Alexandria Traffic Authority integration
+
+Citizens earn badges automatically through Pi AI evaluation:
+
+- 🌿 **Eco Guardian** - Maintain clean air for 30 days
+- 🔊 **Quiet Keeper** - Keep noise low for 7 days
+- 🚗 **Traffic Monitor** - Report 100 traffic readings
+
+Pi AI Architecture:
+
+\`\`\`
+Sensor → LoRaWAN → Pi AI Classifier → Badge Evaluation → Civic Dashboard
+\`\`\`
+
+See `STRUCTURE.md` for full Pi AI integration details and contributor guide.
+
 ---
 
 # 📁 Repository Structure
