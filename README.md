@@ -1,4 +1,6 @@
 # Teos-Pi-Smart-City — IoT + Pi AI Integration (Fix/Scaffold)
+“Part of the TEOS Egypt Blockchain Ecosystem — a unified civil, financial, and smart-city infrastructure powering digital banking, civic governance, DeFi, Pi integration, and national blockchain services.”
+
 
 This commit adds missing scaffolding to enable:
  - IoT ingestion layer (MQTT → Postgres)
